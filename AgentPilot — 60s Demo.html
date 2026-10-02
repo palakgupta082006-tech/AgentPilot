@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentPilot — 60s Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06070a;--ink:#f1f3f6;--dim:#868d98;--line:rgba(200,210,225,.16);--cool:#9fc3ff;--warm:#e9917f;
+--sans:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden;color:var(--ink);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;background:var(--bg);overflow:hidden}
+#stage::before{content:"";position:absolute;inset:0;background:radial-gradient(55% 55% at 50% 45%,rgba(120,160,230,.12),transparent 70%),
+linear-gradient(var(--line) 1px,transparent 1px) 0 0/96px 96px,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/96px 96px;
+-webkit-mask-image:radial-gradient(70% 70% at 50% 45%,#000 20%,transparent 85%);mask-image:radial-gradient(70% 70% at 50% 45%,#000 20%,transparent 85%);opacity:.5}
+#core{position:absolute;left:50%;top:50%;width:1100px;height:1100px;margin:-550px 0 0 -550px;transition:opacity 1s,transform 1.4s cubic-bezier(.6,0,.2,1)}
+#core.big{opacity:1;transform:scale(1)}#core.bg{opacity:.2;transform:scale(1.15)}
+.mono{font-family:var(--mono);font-size:19px;letter-spacing:.2em;text-transform:uppercase}
+.sc{position:absolute;inset:0;opacity:0;transition:opacity .7s;pointer-events:none}.sc.on{opacity:1}
+.r{opacity:0;transform:translateY(22px);transition:opacity .8s,transform .8s cubic-bezier(.2,.7,.2,1)}.r.in{opacity:1;transform:none}
+.grad1{background:linear-gradient(90deg,#9a9186,#d9ccb6 45%,#a69a8a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.grad2{background:linear-gradient(90deg,#fff,#f3e6d2 38%,#e9a18f 68%,#d9594e);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.big{font-weight:900;font-stretch:62%;text-transform:uppercase;line-height:.88}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.brand{position:absolute;left:72px;top:56px;font-weight:800;font-stretch:80%;letter-spacing:.34em;font-size:26px;z-index:5}
+.brand small{display:block;margin-top:10px;font-family:var(--mono);font-weight:300;font-size:15px;letter-spacing:.2em;color:var(--dim)}
+.tag{position:absolute;right:72px;top:62px;z-index:5;color:var(--dim)}
+.tag b{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--cool);box-shadow:0 0 14px var(--cool);margin-right:12px}
+#cap{position:absolute;left:0;right:0;bottom:54px;text-align:center;font-weight:300;font-size:30px;color:#cfd4dc;letter-spacing:.01em;z-index:6;transition:opacity .4s}
+#ill{position:absolute;right:72px;bottom:60px;color:#4b515b;z-index:6;font-size:14px}
+/* s1 */
+#s1 .big{font-size:230px}#s1 p{margin-top:44px;font-size:30px;font-weight:300;color:#c6cbd3;line-height:1.45}
+/* s2 */
+#s2 .big{font-size:210px}#s2 .eq{display:flex;gap:140px;align-items:center}#s2 .x{font-size:80px;color:#555b65;font-weight:200}
+#s2 p{margin-top:56px;font-size:40px;font-weight:300;line-height:1.4}
+/* s3 */
+#s3 .row{display:flex;width:1500px;border-top:1px solid var(--line)}
+.mode{flex:1;text-align:left;padding:34px 36px 0 0;opacity:.28;transition:opacity .6s;position:relative}.mode+.mode{padding-left:36px;border-left:1px solid var(--line)}
+.mode.on{opacity:1}.mode::before{content:"";position:absolute;top:-1px;left:0;right:0;height:2px;background:#fff;transform:scaleX(0);transform-origin:left;transition:transform .8s}.mode.on::before{transform:scaleX(1)}
+.mode b{display:block;font-weight:800;font-stretch:62%;font-size:150px;line-height:1;letter-spacing:.03em}.mode span{display:block;margin-top:16px;font-size:26px;color:#aab0ba;max-width:20ch;line-height:1.4}
+/* s4 workspace */
+#s4 .mbar{position:absolute;left:72px;right:72px;top:150px;display:flex;gap:28px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:20px}
+#s4 .mbar .mono{color:var(--cool)}#s4 .ty{font-size:32px;font-weight:300}
+.stg{position:absolute;left:72px;top:260px}.st{display:flex;gap:22px;align-items:center;padding:15px 0;font-family:var(--mono);font-size:26px;letter-spacing:.18em;color:#464c56;transition:color .4s}
+.st i{font-style:normal;width:42px;color:#3a3f48}.st.on{color:#fff}.st.on::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--cool);box-shadow:0 0 16px var(--cool);animation:bl 1s infinite}
+.st.done{color:#8c939e}.st.done::after{content:"✓";color:var(--cool)}@keyframes bl{50%{opacity:.3}}
+.pn{position:absolute;border-left:1px solid var(--line);padding:6px 0 0 30px;font-family:var(--mono);font-size:21px;line-height:1.7;color:#b3bac5}
+.pn h5{font-weight:400;font-size:15px;letter-spacing:.22em;color:var(--dim);margin-bottom:12px}
+.pn div{opacity:0;transition:opacity .4s}.pn div.in{opacity:1}.k{color:#9fc3ff}.f{color:var(--warm)}.g{color:#bfe3c9}.d{color:#6b727d}
+#code{left:640px;top:260px;width:620px}#tests{left:640px;top:690px;width:620px}#trace{left:1340px;top:260px;width:510px}
+#trace div{color:#9aa1ac;font-size:20px}#trace div.last{color:#fff}
+/* s5 checkpoint */
+#s5{background:radial-gradient(60% 60% at 50% 50%,rgba(6,7,10,.72),rgba(6,7,10,.95))}
+#s5 .big{font-size:200px}#s5 .q{margin-top:30px;color:var(--dim);font-size:28px;font-weight:300}#s5 .bd{margin-top:28px;font-size:38px;line-height:1.4;max-width:1100px}
+#s5 .bt{display:flex;gap:30px;margin-top:56px}.btn{padding:28px 56px;font-weight:700;font-stretch:80%;letter-spacing:.2em;font-size:26px;background:var(--ink);color:#07080b}
+.btn.gh{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);transition:box-shadow .3s,background .3s}.btn.gh.press{box-shadow:inset 0 0 0 1px #fff,0 0 70px rgba(233,145,127,.35);background:rgba(255,255,255,.06)}
+#s5 .gd{margin-top:50px;font-size:40px;font-weight:300;min-height:120px;max-width:1100px;line-height:1.35;border-bottom:1px solid var(--cool);padding-bottom:14px;width:1100px}
+/* s6 trace */
+#s6 .tl{width:1300px;border-left:1px solid var(--line);margin-top:50px}
+#s6 .big{font-size:150px}.ro{display:flex;gap:30px;padding:13px 0 13px 34px;font-size:30px;position:relative;align-items:baseline}
+.ro::before{content:"";position:absolute;left:-5px;top:30px;width:9px;height:9px;border-radius:50%;background:#555b65}
+.ro time{font-family:var(--mono);font-size:19px;color:#555b65;width:90px}.ro em{font-style:normal;font-family:var(--mono);font-size:16px;letter-spacing:.18em;width:120px;color:var(--dim)}
+.ro.p::before{background:var(--cool);box-shadow:0 0 14px var(--cool)}.ro.p em{color:var(--cool)}.ro.x::before{background:var(--warm)}.ro.x span{color:var(--warm)}
+/* s7 report */
+#s7 .big{font-size:150px}.stats{display:grid;grid-template-columns:repeat(5,1fr);width:1640px;border-top:1px solid var(--line);margin-top:56px;text-align:left}
+.stats div{padding:28px 24px 0 0}.stats div+div{padding-left:26px;border-left:1px solid var(--line)}.stats span{display:block;color:var(--dim);margin-bottom:14px}
+.stats b{font-weight:700;font-stretch:72%;font-size:50px;line-height:1.05;display:block}.out{margin-top:54px;font-size:34px;font-weight:300;color:#cfd4dc}
+/* s8 */
+#s8 .big{font-size:150px}#s8 .eq{font-size:46px;letter-spacing:.2em;font-weight:300;margin-bottom:46px;font-stretch:80%}#s8 .w{margin-top:50px;font-weight:800;font-stretch:80%;letter-spacing:.4em;font-size:30px}
+#start{position:fixed;inset:0;z-index:98;display:flex;align-items:center;justify-content:center;background:rgba(6,7,10,.86);font:400 20px var(--mono);letter-spacing:.3em;color:#cfd4dc;cursor:pointer;transition:opacity .5s}#start.hide{opacity:0;pointer-events:none}
+
+/* s4 = prototype workspace screen */
+#win{position:absolute;left:72px;top:168px;width:1776px;height:790px;background:#0b0c0f;border:1px solid #23252c;border-radius:16px;display:flex;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;box-shadow:0 40px 120px rgba(0,0,0,.6)}
+#win .sb{width:262px;background:#0f1013;border-right:1px solid #23252c;padding:26px 20px;display:flex;flex-direction:column}
+#win .lg{font-size:30px;font-weight:700}#win .lg b{color:#d4a84b}#win .sub{font-size:14px;color:#9aa0ab;margin-top:6px}
+#win h6{font-weight:400;font-size:14px;letter-spacing:.14em;color:#6b717c;margin:38px 8px 12px}
+#win .it{padding:15px 16px;border-radius:10px;font-size:19px;color:#c9ced6;margin-bottom:8px}#win .it.a{background:#15171c;border:1px solid #2a2d35;color:#fff}
+#win .hp{margin-top:auto;border:1px solid #23252c;border-radius:12px;padding:14px;font-size:15px;color:#9aa0ab;line-height:1.5}#win .hp b{color:#fff;display:block}
+#win .mn{flex:1;padding:26px 30px;display:grid;grid-template-rows:auto 340px 1fr;gap:20px;min-width:0}
+#win .hd1{display:flex;justify-content:space-between;align-items:flex-start}#win .hd1 h2{font-size:34px;font-weight:700}#win .hd1 p{font-size:17px;color:#aab0ba;margin-top:6px}
+#win .pl{border:1px solid #2c5a3a;background:#0f1d15;color:#6fd08a;font-size:16px;padding:9px 16px;border-radius:30px;position:absolute;right:30px;top:30px}#win .pl.g{border-color:#6b5420;background:#1c1608;color:#d4a84b}
+#win .rw{display:grid;grid-template-columns:1fr 1.05fr;gap:20px;min-height:0}#win .rw2{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;min-height:0}
+#win .cd{background:#121317;border:1px solid #23252c;border-radius:16px;padding:20px 22px;min-height:0;overflow:hidden}#win .cd h3{font-size:21px;font-weight:700;margin-bottom:14px}
+#win .tabs{display:flex;gap:12px}#win .tabs div{flex:1;text-align:center;padding:12px;border-radius:9px;background:#181a20;border:1px solid #2a2d35;font-weight:700;font-size:17px;color:#aab0ba}#win .tabs .a{background:#241d0c;border-color:#d4a84b;color:#d4a84b}
+#win .ta{margin-top:12px;height:96px;border:1px solid #2a2d35;border-radius:10px;background:#0d0e12;padding:12px 14px;font:16px/1.5 var(--mono);color:#e5e8ee}
+#win .go{margin-top:12px;background:#d4a84b;color:#14110a;text-align:center;font-weight:700;font-size:20px;padding:15px;border-radius:9px;transition:filter .3s,transform .3s}#win .go.press{filter:brightness(1.25);transform:scale(.985)}
+#win .tr{background:#0d0e12;border:1px solid #23252c;border-radius:10px;height:262px;padding:8px 16px;font:15px/1 var(--mono);overflow:hidden}
+#win .tr div{display:none;gap:14px;padding:9px 0;border-bottom:1px solid #1a1c22;color:#d6dae1}#win .tr div.in{display:flex}#win .tr time{color:#5d636e}#win .tr .f{color:#e9917f}#win .tr .g{color:#8fd6a4}
+#win table{width:100%;border-collapse:collapse;font-size:17px}#win td{padding:9px 0;border-bottom:1px solid #1d1f25;color:#aab0ba}#win td+td{text-align:right;font-weight:700;color:#fff}
+.sh{display:none}.sh.in{display:inline}.tr .sh.in{display:flex}#win .pl.sh.in{display:block}
+#hud{position:fixed;left:16px;bottom:12px;z-index:99;font:12px var(--mono);color:#6b727d;transition:opacity .6s}#hud.h{opacity:0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<div id="stage">
+<canvas id="core" class="big"></canvas>
+<div class="brand">AGENTPILOT<small>AI CODING AGENT · ENGINEERING SIMULATOR</small></div>
+<div class="tag mono"><b></b>System online</div>
+
+<section class="sc center" id="s1" data-a="0" data-b="5">
+  <h1 class="big r" data-at=".3"><span class="grad1" style="display:block">Your AI can code.</span><span class="grad2" style="display:block">Can you lead it?</span></h1>
+  <p class="r" data-at="2.4">The unit of interaction isn't a prompt.<br>It's an engineering mission.</p>
+</section>
+
+<section class="sc center" id="s2" data-a="5" data-b="10">
+  <div class="eq big"><span class="grad2 r" data-at="5.3">Human = Pilot</span></div>
+  <div class="eq big" style="margin-top:20px"><span class="grad1 r" data-at="6.6">AI = Executor</span></div>
+  <p class="r" data-at="8">You don't approve every keystroke.<br>You lead the mission.</p>
+</section>
+
+<section class="sc center" id="s3" data-a="10" data-b="17">
+  <div class="mono r" data-at="10.2" style="color:var(--dim);margin-bottom:50px">Select your mission</div>
+  <div class="row r" data-at="10.4" id="modes">
+    <div class="mode" data-at="10.8"><b>BUILD</b><span>Build a new application from requirements.</span></div>
+    <div class="mode" data-at="12.8"><b>DEBUG</b><span>Find and fix issues in an existing repository.</span></div>
+    <div class="mode" data-at="14.8"><b>CHANGE</b><span>Modify a system without breaking functionality.</span></div>
+  </div>
+</section>
+
+<section class="sc" id="s4" data-a="17" data-b="33">
+<div id="win" class="r" data-at="17.2">
+ <div class="sb"><div class="lg">Agent<b>Pilot</b></div><div class="sub">AI Coding Agent &amp; Engineering Simulator</div>
+  <h6>MISSIONS</h6><div class="it a">▣ BUILD</div><div class="it">⌁ DEBUG</div><div class="it">↻ CHANGE</div><h6>WORKSPACE</h6><div class="it">◈ Engineering Report</div>
+  <div class="hp"><b>Human = Pilot</b>AI = Executor</div></div>
+ <div class="mn">
+  <div class="hd1"><div><h2>AgentPilot</h2><p>Your AI can code. Can you lead it?</p></div>
+   <div class="pl sh" data-at="0" data-to="21.2"> ● Prototype workspace ready</div><div class="pl g sh" data-at="21.2" data-to="99"> ● Agent running</div></div>
+  <div class="rw">
+   <div class="cd"><h3>Engineering Mission</h3><div class="tabs"><div class="a">BUILD</div><div>DEBUG</div><div>CHANGE</div></div>
+    <div class="ta ty" data-at="17.8" data-text="Add task management functionality with add, delete and complete operations."></div><div class="go" id="go">▶ Start Agent Mission</div></div>
+   <div class="cd"><h3>Agent Interaction Trace</h3><div class="tr"><div class="sh " data-at="21.4"><time>00:01</time><span>Mission received</span></div><div class="sh " data-at="22.4"><time>00:02</time><span>Workspace explored</span></div><div class="sh " data-at="23.4"><time>00:04</time><span>Execution plan created</span></div><div class="sh " data-at="24.6"><time>00:06</time><span>Writing todo.py and tests</span></div><div class="sh " data-at="26.2"><time>00:09</time><span>Tests being executed</span></div><div class="sh f" data-at="27.2"><time>00:10</time><span>Failure detected — toggle_complete</span></div><div class="sh " data-at="28.4"><time>00:12</time><span>Agent adapting — patching toggle()</span></div><div class="sh " data-at="30"><time>00:14</time><span>Tests rerunning</span></div><div class="sh g" data-at="31"><time>00:15</time><span>All available tests passed</span></div><div class="sh g" data-at="31.8"><time>00:16</time><span>Requirements verified</span></div></div></div></div>
+  <div class="rw2">
+   <div class="cd"><h3>Engineering Report</h3><table>
+    <tr><td>Mission</td><td>BUILD</td></tr>
+    <tr><td>Requirement coverage</td><td><span class="sh " data-at="0" data-to="31.8">Waiting</span><span class="sh " data-at="31.8" data-to="99">4 / 4 verified</span></td></tr>
+    <tr><td>Tests</td><td><span class="sh " data-at="0" data-to="26.2">Not run</span><span class="sh " data-at="26.2" data-to="27.2">Running…</span><span class="sh f" data-at="27.2" data-to="31">1 failing</span><span class="sh " data-at="31" data-to="99">All passed</span></td></tr>
+    <tr><td>Files changed</td><td><span class="sh " data-at="0" data-to="31">—</span><span class="sh " data-at="31" data-to="99">5 modified</span></td></tr></table></div>
+   <div class="cd"><h3>Mission Outcome</h3><p style="font-size:19px;line-height:1.5;color:#c3c8d0"><span class="sh " data-at="0" data-to="21.2">Choose BUILD, DEBUG or CHANGE to run the interactive demonstration.</span><span class="sh " data-at="21.2" data-to="31.8">Agent working on the mission…</span><span class="sh " data-at="31.8" data-to="99">Mission complete — requirements verified and tests passing.</span></p></div></div>
+ </div></div></section>
+
+<section class="sc center" id="s5" data-a="33" data-b="40.5">
+  <div class="mono r" data-at="33.3" style="color:var(--cool);margin-bottom:26px;font-size:30px">◆</div>
+  <h2 class="big grad2 r" data-at="33.4">Pilot checkpoint</h2>
+  <p class="q r" data-at="34">The agent has reached a meaningful engineering decision.</p>
+  <p class="bd r" data-at="34.6">The agent proposes changing the task data model.<br>This may affect existing functionality.</p>
+  <div class="bt r" data-at="35.2"><div class="btn">APPROVE &amp; CONTINUE</div><div class="btn gh" id="rd">REDIRECT AGENT</div></div>
+  <div class="gd ty r" data-at="37" data-text="Keep the existing structure. Make the smallest possible change."></div>
+  <div class="btn r" data-at="39.3" style="margin-top:34px">REDIRECT AGENT →</div>
+</section>
+
+<section class="sc center" id="s6" data-a="40.5" data-b="46">
+  <h2 class="big grad1 r" data-at="40.7">Interaction trace</h2>
+  <div class="tl">
+    <div class="ro r" data-at="41.1"><time>00:02</time><em>AGENT</em><span>Explored workspace, created plan</span></div>
+    <div class="ro r" data-at="41.5"><time>00:09</time><em>AGENT</em><span>Wrote todo.py and tests</span></div>
+    <div class="ro x r" data-at="41.9"><time>00:14</time><em>TEST</em><span>Failure detected — toggle_complete</span></div>
+    <div class="ro p r" data-at="42.4"><time>00:17</time><em>PILOT</em><span>Redirected: smallest possible change</span></div>
+    <div class="ro r" data-at="42.9"><time>00:21</time><em>AGENT</em><span>Patched toggle(), reran tests</span></div>
+    <div class="ro r" data-at="43.4"><time>00:25</time><em>TEST</em><span>All tests passed</span></div>
+  </div>
+</section>
+
+<section class="sc center" id="s7" data-a="46" data-b="56">
+  <div class="mono r" data-at="46.2" style="color:var(--dim);margin-bottom:24px">Mission complete</div>
+  <h2 class="big grad2 r" data-at="46.4">Engineering report</h2>
+  <div class="stats r" data-at="47.4">
+    <div><span class="mono">Task</span><b>Completed</b></div><div><span class="mono">Requirements</span><b>4 / 4<br>verified</b></div>
+    <div><span class="mono">Tests</span><b>All passed</b></div><div><span class="mono">Files</span><b>5 modified</b></div>
+    <div><span class="mono">Pilot interventions</span><b>1</b></div></div>
+  <p class="out r" data-at="50">Agent iterations · Interaction trace · Final outcome — every run, accountable.</p>
+</section>
+
+<section class="sc center" id="s8" data-a="56" data-b="60.5">
+  <div class="eq r" data-at="56.2">HUMAN = PILOT &nbsp;·&nbsp; AI = EXECUTOR</div>
+  <h1 class="big r" data-at="57"><span class="grad1" style="display:block">Your AI can code.</span><span class="grad2" style="display:block">Can you lead it?</span></h1>
+  <div class="w r" data-at="58.6">AGENTPILOT</div>
+</section>
+
+<div id="cap"></div><div id="ill" class="mono"></div>
+</div>
+<div id="start" onclick="playing=true">▶ &nbsp;PRESS SPACE TO PLAY</div>
+<div id="hud">V voice on/off · [ ] voice speed · SPACE play/pause · ←/→ seek 5s · R restart · F fullscreen · H hide this</div>
+
+<script>
+const TOTAL=60.5, ILLUSTRATIVE=true;               // set ILLUSTRATIVE=false once you swap in a real recording
+const CUES=[[.4,"Meet AgentPilot — an AI coding agent and engineering simulator."],[5.3,"The Human is the Pilot. The AI is the Executor."],
+ [10.5,"BUILD creates new functionality."],[12.6,"DEBUG finds and fixes failing tests."],[14.7,"CHANGE modifies code, preserving existing behaviour."],
+ [17.4,"The agent explores the project, plans, writes code, runs tests, debugs issues, and verifies the result."],[27.6,"When tests fail, it adapts and reruns."],
+ [33.6,"At important decisions, the Pilot Checkpoint lets you approve, or redirect the agent."],[40.8,"Every step is captured in the Agent Interaction Trace."],
+ [46.5,"The Engineering Report shows requirements, test results, files changed, human interventions, and the final outcome."],
+ [52.4,"AgentPilot teaches developers to delegate, supervise, and lead coding agents."],[57,"Your AI can code. Can you lead it?"]];
+const CAPS=CUES.map((c,i)=>[c[0],i<CUES.length-1?CUES[i+1][0]-.2:60.5,c[1]]);
+const MODES=[[0,'big'],[10,'bg'],[33,'big'],[40.5,'bg'],[46,'big']];
+const STATE=[[0,'ready'],[17,'planning'],[21,'executing'],[33,'checkpoint'],[39.5,'executing'],[46,'complete'],[56,'ready']];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let t=0,playing=false,last=performance.now();
+const st=$('#stage');function fit(){const k=Math.min(innerWidth/1920,innerHeight/1080);st.style.transform=`scale(${k}) translate(-50%,-50%)`;st.style.left='50%';st.style.top='50%';st.style.transformOrigin='0 0';
+  st.style.marginLeft=0;st.style.transform=`translate(${-960*k}px,${-540*k}px) scale(${k})`}
+addEventListener('resize',fit);fit();
+const sc=$$('.sc'),rev=$$('.r'),ty=$$('.ty[data-text]'),groups=[$('#modes')].map(g=>[...g.children].filter(c=>c.dataset.at)),pans=$$('.pn');
+const pick=(arr)=>arr.filter(a=>a[0]<=t).pop();
+function render(){
+  sc.forEach(s=>s.classList.toggle('on',t>=+s.dataset.a&&t<+s.dataset.b));
+  rev.forEach(e=>e.classList.toggle('in',t>=+e.dataset.at&&t<(+e.closest('.sc').dataset.b)));
+  ty.forEach(e=>{const n=Math.max(0,Math.floor((t-e.dataset.at)*30));e.textContent=e.dataset.text.slice(0,n)+(n>0&&n<e.dataset.text.length?'▍':'')});
+  groups.forEach(g=>{const act=g.filter(e=>t>=+e.dataset.at);g.forEach(e=>{e.classList.remove('on','done')});if(act.length){act.at(-1).classList.add('on');act.slice(0,-1).forEach(e=>e.classList.add('done'))}
+    if(g[0].classList.contains('mode')&&t>16.8)g.forEach(e=>e.classList.remove('on'))});
+  pans.forEach(p=>{const ds=[...p.querySelectorAll('div[data-at]')];ds.forEach(d=>d.classList.remove('last'));let l=null;ds.forEach(d=>{const on=t>=+d.dataset.at;d.classList.toggle('in',on);if(on)l=d});if(l&&p.id==='trace')l.classList.add('last')});
+  $('#rd').classList.toggle('press',t>36.2&&t<39.8);$('#go').classList.toggle('press',t>20.8&&t<21.8);
+  $$('.sh').forEach(e=>e.classList.toggle('in',t>=+e.dataset.at&&t<(+e.dataset.to||1e9)));
+  const c=CAPS.find(c=>t>=c[0]&&t<c[1]);$('#cap').textContent=c?c[2]:'';$('#ill').textContent=(ILLUSTRATIVE&&t>16&&t<56)?'Illustrative sequence':'';
+  $('#core').className=pick(MODES)[1];Core.target=Q[pick(STATE)[1]];
+}
+/* ---- AI voice (browser speech synthesis; sync'd to the timeline) ---- */
+let VOICE_ON=true,RATE=1.0,ci=0,lastT=0,wasPlaying=false,V=null;
+const TTS='speechSynthesis' in window;
+function pickVoice(){if(V||!TTS)return V;const v=speechSynthesis.getVoices().filter(x=>/^en/i.test(x.lang));
+  V=v.find(x=>/natural|online/i.test(x.name)&&/guy|ryan|davis|andrew|brian|christopher|eric|steffan/i.test(x.name))||v.find(x=>/natural|online/i.test(x.name))||v.find(x=>/google uk english male|google us english/i.test(x.name))||v[0]||null;return V}
+if(TTS)speechSynthesis.onvoiceschanged=()=>{V=null;pickVoice()};
+function speak(txt){if(!TTS||!VOICE_ON)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);const v=pickVoice();if(v)u.voice=v;u.rate=RATE;u.pitch=.95;speechSynthesis.speak(u)}
+function voiceSync(){if(Math.abs(t-lastT)>.5){TTS&&speechSynthesis.cancel();ci=CUES.findIndex(c=>c[0]>t);if(ci<0)ci=CUES.length}lastT=t;
+  if(playing!==wasPlaying){wasPlaying=playing;if(TTS)playing?speechSynthesis.resume():speechSynthesis.pause();$('#start').classList.toggle('hide',playing||t>0)}
+  while(ci<CUES.length&&CUES[ci][0]<=t){if(playing&&t-CUES[ci][0]<1)speak(CUES[ci][1]);ci++}}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='v'){VOICE_ON=!VOICE_ON;if(!VOICE_ON&&TTS)speechSynthesis.cancel()}
+  if(e.key==='['||e.key===']'){RATE=Math.min(1.4,Math.max(.7,RATE+(e.key===']'?.05:-.05)))}});
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;if(playing){t+=dt;if(t>TOTAL){t=TOTAL;playing=false}}voiceSync();render();requestAnimationFrame(loop)}
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(e.key===' '){e.preventDefault();if(t>=TOTAL)t=0;playing=!playing}
+ else if(e.key==='ArrowRight')t=Math.min(TOTAL,t+5);else if(e.key==='ArrowLeft')t=Math.max(0,t-5);else if(k==='r'){t=0;playing=true}
+ else if(k==='f')document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();else if(k==='h')$('#hud').classList.toggle('h')});
+setTimeout(()=>$('#hud').classList.add('h'),6000);
+
+/* ---- agent core ---- */
+const Q={ready:{spin:.12,glow:.5,amp:.12,part:.3,scan:0,hold:0},planning:{spin:.5,glow:.7,amp:.35,part:.5,scan:1,hold:0},executing:{spin:1.1,glow:1,amp:1,part:1,scan:0,hold:0},
+ checkpoint:{spin:.02,glow:.9,amp:.04,part:.2,scan:0,hold:1},complete:{spin:.08,glow:.65,amp:0,part:.15,scan:0,hold:0}};
+const Core=(()=>{const cv=$('#core'),x=cv.getContext('2d'),S=1100,D=1;cv.width=cv.height=S;let T=0,lt=0,pulse=0;const cur={...Q.ready},o={target:Q.ready};
+ const P=Array.from({length:130},()=>({a:Math.random()*6.283,r:.25+Math.random()*.7,s:(Math.random()-.5)*.8,z:Math.random()}));const col=a=>`rgba(190,215,255,${a})`;
+ function f(ts){const dt=Math.min((ts-lt)/1000||.016,.05);lt=ts;for(const k in cur)cur[k]+=(o.target[k]-cur[k])*Math.min(1,dt*2.2);T+=dt;const R=S/2*.9,ph=T*cur.spin;
+  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,S,S);x.translate(S/2,S/2);x.lineWidth=1.5;
+  let g=x.createRadialGradient(0,0,R*.05,0,0,R);g.addColorStop(0,col(.24*cur.glow*(.85+.15*Math.sin(T*1.6))));g.addColorStop(.45,col(.06*cur.glow));g.addColorStop(1,'transparent');x.fillStyle=g;x.beginPath();x.arc(0,0,R,0,7);x.fill();
+  [.97,.78,.62,.34].forEach((q,i)=>{x.strokeStyle=col(.11+i*.02);x.setLineDash(i%2?[2,9]:[]);x.lineDashOffset=-ph*40*(i+1);x.beginPath();x.arc(0,0,R*q,0,7);x.stroke()});x.setLineDash([]);
+  x.save();x.rotate(ph*.25);for(let i=0;i<180;i++){const a=i/180*6.283,l=i%15?i%5?.012:.025:.045;x.strokeStyle=col(i%15?.2:.5);x.beginPath();x.moveTo(Math.cos(a)*R*.88,Math.sin(a)*R*.88);x.lineTo(Math.cos(a)*R*(.88-l),Math.sin(a)*R*(.88-l));x.stroke()}x.restore();
+  for(let k=0;k<2;k++){x.save();x.rotate(.9+k*1.5+ph*(.15+k*.1)*(k?-1:1));x.scale(1,.34);const r=R*(.7+k*.12);x.strokeStyle=col(.17);x.beginPath();x.arc(0,0,r,0,7);x.stroke();const a=T*(.6+cur.spin*.8)*(k?-1:1)+k*2;x.fillStyle=col(.9);x.beginPath();x.arc(Math.cos(a)*r,Math.sin(a)*r,4,0,7);x.fill();x.restore()}
+  x.strokeStyle=col(.55+.3*cur.glow);x.lineWidth=2;x.beginPath();for(let i=0;i<=240;i++){const a=i/240*6.283,w=Math.sin(a*7+T*3)*.5+Math.sin(a*13-T*2.1)*.35+Math.sin(a*3+T*1.3)*.4,r=R*.5+w*R*.05*cur.amp+(cur.scan?Math.sin(a*2-T*4)*R*.012:0);i?x.lineTo(Math.cos(a)*r,Math.sin(a)*r):x.moveTo(Math.cos(a)*r,Math.sin(a)*r)}x.closePath();x.stroke();x.lineWidth=1.5;
+  if(cur.scan>.02){x.save();x.rotate(T*1.8);const sg=x.createLinearGradient(0,0,R*.9,0);sg.addColorStop(0,col(0));sg.addColorStop(1,col(.5*cur.scan));x.strokeStyle=sg;x.beginPath();x.moveTo(0,0);x.lineTo(R*.9,0);x.stroke();x.restore()}
+  for(let i=0;i<3;i++){x.save();x.rotate(ph*(i?-1:1)*(1.4-i*.3)+i*.5);const n=i===1?6:4,r=R*(.26-i*.07);x.strokeStyle=col(.7-i*.15);x.beginPath();for(let j=0;j<=n;j++){const a=j/n*6.283;j?x.lineTo(Math.cos(a)*r,Math.sin(a)*r):x.moveTo(Math.cos(a)*r,Math.sin(a)*r)}x.stroke();x.restore()}
+  g=x.createRadialGradient(0,0,0,0,0,R*.1);g.addColorStop(0,`rgba(255,255,255,${.7+.3*Math.sin(T*2.4)})`);g.addColorStop(1,'transparent');x.fillStyle=g;x.beginPath();x.arc(0,0,R*.1,0,7);x.fill();
+  for(const p of P){p.a+=p.s*dt*(.15+cur.part*.7);if(cur.part>.8)p.r-=dt*.05*p.z;if(p.r<.22)p.r=.95;x.fillStyle=col((.15+.6*p.z)*Math.min(1,cur.part+.3));x.fillRect(Math.cos(p.a)*R*p.r,Math.sin(p.a)*R*p.r,1.5+p.z*2,1.5+p.z*2)}
+  if(o.target.hold){pulse=(pulse+dt*.5)%1;x.strokeStyle=col(.6*(1-pulse));x.beginPath();x.arc(0,0,R*(.3+pulse*.6),0,7);x.stroke()}
+  requestAnimationFrame(f)}requestAnimationFrame(f);return o})();
+requestAnimationFrame(loop);
+</script></body></html>
